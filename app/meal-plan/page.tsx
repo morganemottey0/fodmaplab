@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { DayPlan, MealPlan } from "@/types/fodmap";
+import { tapProps } from "@/lib/tap";
 
 export default function MealPlanPage() {
   const [days, setDays] = useState(3);
@@ -48,7 +49,7 @@ export default function MealPlanPage() {
             {[1, 2, 3, 5, 7].map((d) => (
               <button
                 key={d}
-                onClick={() => setDays(d)}
+                {...tapProps(() => setDays(d))}
                 style={{
                   flex: 1,
                   padding: "10px 0",
@@ -92,7 +93,7 @@ export default function MealPlanPage() {
 
         {/* Bouton */}
         <button
-          onClick={generate}
+          {...tapProps(() => generate())}
           disabled={loading}
           style={{
             width: "100%",

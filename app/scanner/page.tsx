@@ -1,5 +1,6 @@
 "use client";
 
+import { tapProps } from "@/lib/tap";
 import { useState } from "react";
 import { FodmapAnalysis } from "@/types/fodmap";
 import FodmapResult from "@/components/FodmapResult";
@@ -73,7 +74,7 @@ export default function ScannerPage() {
             {[50, 100, 150, 200].map((p) => (
               <button
                 key={p}
-                onClick={() => setPortion(p)}
+                {...tapProps(() => setPortion(p))}
                 style={{
                   flex: 1,
                   padding: "10px 0",
@@ -94,7 +95,7 @@ export default function ScannerPage() {
 
         {/* Bouton */}
         <button
-          onClick={analyze}
+          {...tapProps(() => analyze())}
           disabled={loading || !food.trim()}
           style={{
             width: "100%",

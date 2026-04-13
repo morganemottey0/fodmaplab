@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { anthropic } from "@/lib/anthropic";
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
+
 const SYSTEM_PROMPT = `Tu es un diététicien bienveillant et expert en régime low-FODMAP.
 Tu aides les personnes souffrant du syndrome de l'intestin irritable (SII) à mieux gérer leur alimentation.
 
@@ -29,7 +33,7 @@ export async function POST(req: NextRequest) {
     }
 
     const stream = await anthropic.messages.stream({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       messages,

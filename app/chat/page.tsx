@@ -1,5 +1,6 @@
 "use client";
 
+import { tapProps } from "@/lib/tap";
 import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "@/types/fodmap";
 
@@ -105,7 +106,7 @@ export default function ChatPage() {
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
-                  onClick={() => send(s)}
+                  {...tapProps(() => send(s))}
                   style={{
                     background: "#fff",
                     border: "1px solid #DAEAF8",
@@ -176,7 +177,7 @@ export default function ChatPage() {
             }}
           />
           <button
-            onClick={() => send()}
+            {...tapProps(() => send())}
             disabled={loading || !input.trim()}
             style={{
               width: "42px",

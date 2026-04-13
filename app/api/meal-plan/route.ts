@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     // Collecter le texte complet via le stream
     const stream = await anthropic.messages.stream({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [

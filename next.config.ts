@@ -5,4 +5,9 @@ const withPWA = require("next-pwa")({
 
 module.exports = withPWA({
   turbopack: {},
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "2mb",
+    },
+  },
 });

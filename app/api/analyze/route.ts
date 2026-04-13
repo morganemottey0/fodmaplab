@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
     // Étape 2 — Fallback Claude
     const message = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1024,
       system: SYSTEM_PROMPT,
       messages: [
