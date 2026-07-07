@@ -1,14 +1,13 @@
 "use client";
 
-import { tapProps } from "@/lib/tap";
 import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "@/types/fodmap";
 
 const SUGGESTIONS = [
   "Puis-je manger de l'avocat ?",
   "Substituts à l'ail ?",
-  "Idée de petit-déjeuner rapide",
-  "Quels laits végétaux ?",
+  "Lait végétal low-FODMAP ?",
+  "Idée petit-déjeuner rapide",
 ];
 
 export default function ChatPage() {
@@ -30,7 +29,6 @@ export default function ChatPage() {
     setMessages(updatedMessages);
     setInput("");
     setLoading(true);
-
     setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
     try {
@@ -41,10 +39,7 @@ export default function ChatPage() {
       });
 
       if (!res.ok || !res.body) {
-        setMessages((prev) => [
-          ...prev.slice(0, -1),
-          { role: "assistant", content: "Une erreur est survenue." },
-        ]);
+        setMessages((prev) => [...prev.slice(0, -1), { role: "assistant", content: "Une erreur est survenue." }]);
         return;
       }
 
@@ -65,59 +60,44 @@ export default function ChatPage() {
         });
       }
     } catch {
-      setMessages((prev) => [
-        ...prev.slice(0, -1),
-        { role: "assistant", content: "Impossible de contacter le serveur." },
-      ]);
+      setMessages((prev) => [...prev.slice(0, -1), { role: "assistant", content: "Impossible de contacter le serveur." }]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100dvh" }}>
+    <div className="flex flex-col" style={{ height: "100dvh" }}>
 
       {/* Header */}
-      <div style={{ background: "#185FA5", padding: "52px 24px 20px", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{
-            width: "38px", height: "38px", borderRadius: "50%",
-            background: "#0C447C",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: "#85B7EB" }} />
+      <div className="gradient-primary flex-shrink-0" style={{ padding: "52px 24px 20px" }}>
+        <div className="decoration-circle-lg" />
+        <div className="decoration-circle-sm" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ background: "rgba(255,255,255,0.2)" }}>
+            <div className="w-4 h-4 rounded-full bg-white" />
           </div>
           <div>
-            <p style={{ fontSize: "15px", fontWeight: 500, color: "#fff", margin: 0 }}>Diététicien AI</p>
-            <p style={{ fontSize: "11px", color: "#85B7EB", margin: 0 }}>Expert FODMAP · en ligne</p>
+            <p className="text-white text-sm font-semibold m-0">Diététicien AI</p>
+            <p className="text-xs m-0" style={{ color: "rgba(255,255,255,0.6)" }}>Expert FODMAP · en ligne</p>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "20px 16px", display: "flex", flexDirection: "column", gap: "12px" }}>
-
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 bg-app">
         {messages.length === 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-            <p style={{ fontSize: "13px", color: "#85B7EB", textAlign: "center", margin: "8px 0 16px" }}>
+          <div className="flex flex-col gap-3">
+            <p className="text-center text-sm text-muted my-2">
               Bonjour ! Comment puis-je vous aider ?
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+            <div className="grid grid-cols-2 gap-2">
               {SUGGESTIONS.map((s) => (
                 <button
                   key={s}
-                  {...tapProps(() => send(s))}
-                  style={{
-                    background: "#fff",
-                    border: "1px solid #DAEAF8",
-                    borderRadius: "14px",
-                    padding: "12px",
-                    fontSize: "12px",
-                    color: "#0C447C",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    lineHeight: 1.4,
-                  }}
+                  onClick={() => send(s)}
+                  className="card text-left text-xs text-primary cursor-pointer"
+                  style={{ lineHeight: 1.5 }}
                 >
                   {s}
                 </button>
@@ -127,21 +107,19 @@ export default function ChatPage() {
         )}
 
         {messages.map((msg, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
-            <div style={{
-              maxWidth: "80%",
-              borderRadius: msg.role === "user" ? "18px 4px 18px 18px" : "4px 18px 18px 18px",
-              padding: "12px 14px",
-              background: msg.role === "user" ? "#185FA5" : "#fff",
-              border: msg.role === "user" ? "none" : "1px solid #DAEAF8",
-              fontSize: "13px",
-              color: msg.role === "user" ? "#fff" : "#0C447C",
-              lineHeight: 1.6,
-              whiteSpace: "pre-wrap",
-            }}>
-              {msg.content || (
-                <span style={{ color: "#85B7EB" }}>En train de répondre...</span>
-              )}
+          <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+            <div
+              className={`max-w-xs px-4 py-3 text-sm whitespace-pre-wrap ${
+                msg.role === "user"
+                  ? "bg-primary text-white"
+                  : "bg-surface text-primary border border-primary"
+              }`}
+              style={{
+                borderRadius: msg.role === "user" ? "18px 4px 18px 18px" : "4px 18px 18px 18px",
+                lineHeight: 1.6,
+              }}
+            >
+              {msg.content || <span className="text-muted">En train de répondre...</span>}
             </div>
           </div>
         ))}
@@ -150,52 +128,26 @@ export default function ChatPage() {
       </div>
 
       {/* Input */}
-      <div style={{
-        background: "#fff",
-        borderTop: "1px solid #DAEAF8",
-        padding: "12px 16px calc(12px + env(safe-area-inset-bottom))",
-        flexShrink: 0,
-      }}>
-        <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
+      <div className="bg-surface flex-shrink-0 px-4 py-3" style={{ borderTop: "1px solid var(--primary-border)", paddingBottom: "calc(12px + env(safe-area-inset-bottom))" }}>
+        <div className="flex gap-2 items-end">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
-            placeholder="Posez votre question..."
+            placeholder="Votre question..."
             rows={1}
-            style={{
-              flex: 1,
-              background: "#F8FBFF",
-              border: "1px solid #DAEAF8",
-              borderRadius: "14px",
-              padding: "12px 14px",
-              fontSize: "14px",
-              color: "#0C447C",
-              outline: "none",
-              resize: "none",
-              fontFamily: "inherit",
-            }}
+            className="input flex-1 resize-none"
+            style={{ padding: "10px 14px" }}
           />
           <button
-            {...tapProps(() => send())}
+            onClick={() => send()}
             disabled={loading || !input.trim()}
-            style={{
-              width: "42px",
-              height: "42px",
-              borderRadius: "50%",
-              border: "none",
-              background: loading || !input.trim() ? "#B5D4F4" : "#185FA5",
-              cursor: loading || !input.trim() ? "not-allowed" : "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
+            className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0 disabled:opacity-50"
           >
-            <div style={{ width: 0, height: 0, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderLeft: "8px solid #fff", marginLeft: "2px" }} />
+            <div style={{ width: 0, height: 0, borderTop: "5px solid transparent", borderBottom: "5px solid transparent", borderLeft: "7px solid #fff", marginLeft: "2px" }} />
           </button>
         </div>
-        <p style={{ fontSize: "11px", color: "#B5D4F4", textAlign: "center", margin: "8px 0 0" }}>
+        <p className="text-xs text-center text-muted mt-2">
           Ne remplace pas l'avis d'un professionnel de santé
         </p>
       </div>

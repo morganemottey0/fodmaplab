@@ -1,9 +1,15 @@
 "use client";
 
-import { tapProps } from "@/lib/tap";
 import { useState } from "react";
 import { FodmapAnalysis } from "@/types/fodmap";
-import FodmapResult from "@/components/FodmapResult";
+
+const PORTIONS = [50, 100, 150, 200];
+
+const LEVEL_CONFIG = {
+  low:    { bg: "#E8F5E9", border: "#C8E6C9", dot: "#4CAF50", text: "#1B5E20", label: "Low FODMAP" },
+  medium: { bg: "#FFF8E1", border: "#FFE0B2", dot: "#FF9800", text: "#E65100", label: "Modéré" },
+  high:   { bg: "#FFEBEE", border: "#FFCDD2", dot: "#F44336", text: "#B71C1C", label: "High FODMAP" },
+};
 
 export default function ScannerPage() {
   const [food, setFood] = useState("");
@@ -14,6 +20,7 @@ export default function ScannerPage() {
 
   const analyze = async () => {
     if (!food.trim()) return;
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
     setLoading(true);
     setError(null);
     setResult(null);
@@ -31,61 +38,44 @@ export default function ScannerPage() {
   };
 
   return (
-    <div>
+    <div className="bg-app min-h-screen">
+
       {/* Header */}
-      <div style={{ background: "#185FA5", padding: "52px 24px 24px" }}>
-        <p style={{ fontSize: "13px", color: "#85B7EB", margin: "0 0 4px" }}>Analyser</p>
-        <h1 style={{ fontSize: "24px", fontWeight: 500, color: "#fff", margin: 0, letterSpacing: "-0.03em" }}>
-          Un aliment
-        </h1>
+      <div className="gradient-primary page-header">
+        <div className="decoration-circle-lg" />
+        <div className="decoration-circle-sm" />
+        <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>Analyser</p>
+        <h1 className="text-white text-2xl font-semibold tracking-tight">Un aliment</h1>
       </div>
 
-      <div style={{ padding: "24px 20px" }}>
-        {/* Champ aliment */}
-        <div style={{ marginBottom: "14px" }}>
-          <label style={{ fontSize: "12px", color: "#85B7EB", letterSpacing: "0.06em", display: "block", marginBottom: "8px" }}>
-            ALIMENT
-          </label>
+      <div className="px-5 pt-6 flex flex-col gap-4">
+
+        {/* Aliment */}
+        <div>
+          <label className="label">Aliment</label>
           <input
             type="text"
             value={food}
             onChange={(e) => setFood(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && analyze()}
             placeholder="Ex : mangue, ail, brocoli..."
-            style={{
-              width: "100%",
-              background: "#fff",
-              border: "1px solid #DAEAF8",
-              borderRadius: "14px",
-              padding: "14px 16px",
-              fontSize: "15px",
-              color: "#0C447C",
-              outline: "none",
-            }}
+            className="input"
           />
         </div>
 
         {/* Portion */}
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ fontSize: "12px", color: "#85B7EB", letterSpacing: "0.06em", display: "block", marginBottom: "8px" }}>
-            PORTION — {portion}g
-          </label>
-          <div style={{ display: "flex", gap: "8px" }}>
-            {[50, 100, 150, 200].map((p) => (
+        <div>
+          <label className="label">Portion — {portion}g</label>
+          <div className="flex gap-2">
+            {PORTIONS.map((p) => (
               <button
                 key={p}
-                {...tapProps(() => setPortion(p))}
-                style={{
-                  flex: 1,
-                  padding: "10px 0",
-                  borderRadius: "12px",
-                  border: `1px solid ${portion === p ? "#185FA5" : "#DAEAF8"}`,
-                  background: portion === p ? "#E6F1FB" : "#fff",
-                  color: portion === p ? "#185FA5" : "#85B7EB",
-                  fontSize: "13px",
-                  fontWeight: portion === p ? 500 : 400,
-                  cursor: "pointer",
-                }}
+                onClick={() => setPortion(p)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                  portion === p
+                    ? "bg-primary-light border-primary text-primary"
+                    : "bg-surface border-primary text-muted"
+                }`}
               >
                 {p}g
               </button>
@@ -95,31 +85,65 @@ export default function ScannerPage() {
 
         {/* Bouton */}
         <button
-          {...tapProps(() => analyze())}
+          onClick={analyze}
           disabled={loading || !food.trim()}
-          style={{
-            width: "100%",
-            padding: "16px",
-            borderRadius: "16px",
-            border: "none",
-            background: loading || !food.trim() ? "#B5D4F4" : "#185FA5",
-            color: "#fff",
-            fontSize: "15px",
-            fontWeight: 500,
-            cursor: loading || !food.trim() ? "not-allowed" : "pointer",
-            marginBottom: "24px",
-          }}
+          className="btn-primary disabled:opacity-50"
         >
           {loading ? "Analyse en cours..." : "Analyser"}
         </button>
 
+        {/* Erreur */}
         {error && (
-          <div style={{ background: "#FFEBEE", border: "1px solid #FFCDD2", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px" }}>
-            <p style={{ fontSize: "13px", color: "#C62828", margin: 0 }}>{error}</p>
+          <div className="rounded-2xl px-4 py-3" style={{ background: "#FFEBEE", border: "1px solid #FFCDD2" }}>
+            <p className="text-sm m-0" style={{ color: "#C62828" }}>{error}</p>
           </div>
         )}
 
-        {result && <FodmapResult data={result} />}
+        {/* Résultat */}
+        {result && (() => {
+          const cfg = LEVEL_CONFIG[result.level];
+          return (
+            <div className="flex flex-col gap-3">
+              <div className="rounded-2xl p-4 flex justify-between items-center" style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}>
+                <div>
+                  <p className="text-xs uppercase tracking-wide mb-1" style={{ color: cfg.text }}>Niveau FODMAP</p>
+                  <p className="text-2xl font-semibold m-0" style={{ color: cfg.text }}>{cfg.label}</p>
+                </div>
+                <div className="w-12 h-12 rounded-full" style={{ background: cfg.dot }} />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="card">
+                  <p className="label">Portion analysée</p>
+                  <p className="text-xl font-semibold text-primary m-0">{result.portion}g</p>
+                </div>
+                <div className="card">
+                  <p className="label">Portion sûre</p>
+                  <p className="text-xl font-semibold text-primary m-0">
+                    {result.safe_portion === 0 ? "—" : `${result.safe_portion}g`}
+                  </p>
+                </div>
+              </div>
+
+              {result.fodmaps.length > 0 && (
+                <div className="card">
+                  <p className="label">FODMAP présents</p>
+                  <div className="flex flex-wrap gap-2">
+                    {result.fodmaps.map((f) => (
+                      <span key={f} className="chip">{f}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="card" style={{ borderLeft: "3px solid var(--primary)" }}>
+                <p className="label">Conseil</p>
+                <p className="text-sm text-primary m-0" style={{ lineHeight: 1.6 }}>{result.tips}</p>
+              </div>
+            </div>
+          );
+        })()}
+
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import NavigationWrapper from "@/components/NavigationWrapper";
 import SessionProvider from "@/components/SessionProvider";
+import SideBar from "@/components/SideBar";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#185FA5",
+  themeColor: "#6C63D4",
 };
 
 export default function RootLayout({
@@ -33,16 +34,18 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
       </head>
-      <body style={{
-        maxWidth: "430px",
-        margin: "0 auto",
-        minHeight: "100dvh",
-        background: "#F8FBFF",
-      }}>
+      <body>
         <SessionProvider>
-          <NavigationWrapper>
-            {children}
-          </NavigationWrapper>
+          <div className="app-shell">
+            {/* Sidebar desktop uniquement */}
+            <SideBar />
+            {/* Contenu principal */}
+            <div className="app-content">
+              <NavigationWrapper>
+                {children}
+              </NavigationWrapper>
+            </div>
+          </div>
         </SessionProvider>
       </body>
     </html>

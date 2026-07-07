@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { DayPlan, MealPlan } from "@/types/fodmap";
-import { tapProps } from "@/lib/tap";
+
+const DAYS_OPTIONS = [1, 2, 3, 5, 7];
+const MEAL_LABELS = [
+  { key: "breakfast", label: "Petit-déjeuner" },
+  { key: "lunch", label: "Déjeuner" },
+  { key: "dinner", label: "Dîner" },
+] as const;
 
 export default function MealPlanPage() {
   const [days, setDays] = useState(3);
@@ -29,38 +35,31 @@ export default function MealPlanPage() {
   };
 
   return (
-    <div>
+    <div className="bg-app min-h-screen">
+
       {/* Header */}
-      <div style={{ background: "#185FA5", padding: "52px 24px 24px" }}>
-        <p style={{ fontSize: "13px", color: "#85B7EB", margin: "0 0 4px" }}>Générer</p>
-        <h1 style={{ fontSize: "24px", fontWeight: 500, color: "#fff", margin: 0, letterSpacing: "-0.03em" }}>
-          Mon plan de repas
-        </h1>
+      <div className="gradient-primary page-header">
+        <div className="decoration-circle-lg" />
+        <div className="decoration-circle-sm" />
+        <p className="text-sm mb-1" style={{ color: "rgba(255,255,255,0.6)" }}>Générer</p>
+        <h1 className="text-white text-2xl font-semibold tracking-tight">Mon plan de repas</h1>
       </div>
 
-      <div style={{ padding: "24px 20px" }}>
+      <div className="px-5 pt-6 flex flex-col gap-4">
 
-        {/* Nombre de jours */}
-        <div style={{ marginBottom: "20px" }}>
-          <p style={{ fontSize: "12px", color: "#85B7EB", letterSpacing: "0.06em", marginBottom: "10px" }}>
-            NOMBRE DE JOURS
-          </p>
-          <div style={{ display: "flex", gap: "8px" }}>
-            {[1, 2, 3, 5, 7].map((d) => (
+        {/* Jours */}
+        <div>
+          <label className="label">Nombre de jours</label>
+          <div className="flex gap-2">
+            {DAYS_OPTIONS.map((d) => (
               <button
                 key={d}
-                {...tapProps(() => setDays(d))}
-                style={{
-                  flex: 1,
-                  padding: "10px 0",
-                  borderRadius: "12px",
-                  border: `1px solid ${days === d ? "#185FA5" : "#DAEAF8"}`,
-                  background: days === d ? "#E6F1FB" : "#fff",
-                  color: days === d ? "#185FA5" : "#85B7EB",
-                  fontSize: "13px",
-                  fontWeight: days === d ? 500 : 400,
-                  cursor: "pointer",
-                }}
+                onClick={() => setDays(d)}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border ${
+                  days === d
+                    ? "bg-primary-light border-primary text-primary"
+                    : "bg-surface border-primary text-muted"
+                }`}
               >
                 {d}j
               </button>
@@ -69,94 +68,51 @@ export default function MealPlanPage() {
         </div>
 
         {/* Préférences */}
-        <div style={{ marginBottom: "20px" }}>
-          <p style={{ fontSize: "12px", color: "#85B7EB", letterSpacing: "0.06em", marginBottom: "10px" }}>
-            PRÉFÉRENCES
-          </p>
+        <div>
+          <label className="label">Préférences</label>
           <input
             type="text"
             value={preferences}
             onChange={(e) => setPreferences(e.target.value)}
             placeholder="Végétarien, sans gluten..."
-            style={{
-              width: "100%",
-              background: "#fff",
-              border: "1px solid #DAEAF8",
-              borderRadius: "14px",
-              padding: "14px 16px",
-              fontSize: "15px",
-              color: "#0C447C",
-              outline: "none",
-            }}
+            className="input"
           />
         </div>
 
         {/* Bouton */}
         <button
-          {...tapProps(() => generate())}
+          onClick={generate}
           disabled={loading}
-          style={{
-            width: "100%",
-            padding: "16px",
-            borderRadius: "16px",
-            border: "none",
-            background: loading ? "#B5D4F4" : "#185FA5",
-            color: "#fff",
-            fontSize: "15px",
-            fontWeight: 500,
-            cursor: loading ? "not-allowed" : "pointer",
-            marginBottom: "24px",
-          }}
+          className="btn-primary disabled:opacity-50"
         >
           {loading ? "Génération en cours..." : "Générer mon plan"}
         </button>
 
         {/* Erreur */}
         {error && (
-          <div style={{ background: "#FFEBEE", border: "1px solid #FFCDD2", borderRadius: "14px", padding: "14px 16px", marginBottom: "16px" }}>
-            <p style={{ fontSize: "13px", color: "#C62828", margin: 0 }}>{error}</p>
+          <div className="rounded-2xl px-4 py-3" style={{ background: "#FFEBEE", border: "1px solid #FFCDD2" }}>
+            <p className="text-sm m-0" style={{ color: "#C62828" }}>{error}</p>
           </div>
         )}
 
         {/* Résultat */}
         {mealPlan && (
-          <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          <div className="flex flex-col gap-5 pb-6">
             {mealPlan.days.map((day: DayPlan) => (
               <div key={day.day}>
-                <p style={{ fontSize: "11px", color: "#85B7EB", letterSpacing: "0.1em", marginBottom: "10px" }}>
-                  {day.day.toUpperCase()}
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {[
-                    { label: "Petit-déjeuner", meal: day.breakfast },
-                    { label: "Déjeuner", meal: day.lunch },
-                    { label: "Dîner", meal: day.dinner },
-                  ].map(({ label, meal }) => (
-                    <div key={label} style={{
-                      background: "#fff",
-                      border: "1px solid #DAEAF8",
-                      borderRadius: "16px",
-                      padding: "16px",
-                    }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                        <p style={{ fontSize: "11px", color: "#85B7EB", letterSpacing: "0.06em", margin: 0 }}>
-                          {label.toUpperCase()}
-                        </p>
-                        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#4CAF50" }} />
+                <p className="section-label">{day.day}</p>
+                <div className="flex flex-col gap-2">
+                  {MEAL_LABELS.map(({ key, label }) => (
+                    <div key={key} className="card">
+                      <div className="flex justify-between items-center mb-2">
+                        <p className="label m-0">{label}</p>
+                        <div className="w-2 h-2 rounded-full" style={{ background: "#4CAF50" }} />
                       </div>
-                      <p style={{ fontSize: "15px", fontWeight: 500, color: "#0C447C", margin: "0 0 6px" }}>
-                        {meal.name}
-                      </p>
-                      <p style={{ fontSize: "12px", color: "#85B7EB", margin: "0 0 8px", lineHeight: 1.5 }}>
-                        {meal.ingredients.join(" · ")}
-                      </p>
-                      <div style={{
-                        background: "#E6F1FB",
-                        borderRadius: "10px",
-                        padding: "8px 12px",
-                      }}>
-                        <p style={{ fontSize: "12px", color: "#185FA5", margin: 0, lineHeight: 1.5 }}>
-                          {meal.tips}
+                      <p className="text-sm font-semibold text-primary mb-1">{day[key].name}</p>
+                      <p className="text-xs text-muted mb-2">{day[key].ingredients.join(" · ")}</p>
+                      <div className="rounded-xl px-3 py-2 bg-primary-light">
+                        <p className="text-xs m-0" style={{ color: "var(--primary)", lineHeight: 1.5 }}>
+                          {day[key].tips}
                         </p>
                       </div>
                     </div>
@@ -166,6 +122,7 @@ export default function MealPlanPage() {
             ))}
           </div>
         )}
+
       </div>
     </div>
   );
