@@ -3,8 +3,8 @@ import { z } from "zod";
 import { anthropic } from "@/lib/anthropic";
 import { findFoodLocally } from "@/lib/fodmap-data";
 import { FodmapAnalysis } from "@/types/fodmap";
+import { prisma } from "@/lib/prisma";
 
-// Schéma Zod pour valider la réponse de Claude
 const FodmapResponseSchema = z.object({
   food: z.string(),
   portion: z.number(),
@@ -18,7 +18,6 @@ const FodmapResponseSchema = z.object({
 
 const SYSTEM_PROMPT = `Tu es un expert en nutrition spécialisé dans le régime low-FODMAP.
 Ton rôle est d'analyser des aliments et de fournir une évaluation précise de leur teneur en FODMAP.
-
 Tu réponds UNIQUEMENT en JSON valide, sans texte avant ni après, sans balises markdown.
 Le JSON doit respecter exactement cette structure :
 {
@@ -29,7 +28,6 @@ Le JSON doit respecter exactement cette structure :
   "safe_portion": nombre en grammes (0 si à éviter complètement),
   "tips": "conseil pratique court pour cuisiner ou substituer cet aliment"
 }
-
 Règles :
 - "level" est basé sur les recommandations de Monash University
 - "fodmaps" liste uniquement les FODMAP effectivement présents
@@ -50,6 +48,19 @@ export async function POST(req: NextRequest) {
     // Étape 1 — Chercher dans la base locale
     const localResult = findFoodLocally(food);
     if (localResult) {
+      // Sauvegarder en base
+      await prisma.analysis.create({
+        data: {
+          food,
+          portion,
+          level: localResult.level,
+          fodmaps: localResult.fodmaps,
+          safePortion: localResult.safe_portion,
+          tips: localResult.tips,
+          source: "local",
+        },
+      });
+
       return NextResponse.json({
         ...localResult,
         food,
@@ -71,25 +82,31 @@ export async function POST(req: NextRequest) {
       ],
     });
 
-    // Extraire le texte de la réponse
     const rawText = message.content
       .filter((block) => block.type === "text")
       .map((block) => block.text)
       .join("");
-    
-    // Nettoyer le texte avant de parser
-const cleanText = rawText
-.replace(/```json/g, "")
-.replace(/```/g, "")
-.trim();
 
-console.log("[analyze] Réponse brute Claude :", cleanText);
+    const cleanText = rawText
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-// Parser et valider avec Zod
-const parsed = JSON.parse(cleanText);
-
-    // Parser et valider avec Zod
+    const parsed = JSON.parse(cleanText);
     const validated = FodmapResponseSchema.parse(parsed);
+
+    // Sauvegarder en base
+    await prisma.analysis.create({
+      data: {
+        food: validated.food,
+        portion: validated.portion,
+        level: validated.level,
+        fodmaps: validated.fodmaps,
+        safePortion: validated.safe_portion,
+        tips: validated.tips,
+        source: "claude",
+      },
+    });
 
     return NextResponse.json({
       ...validated,
@@ -116,5 +133,5 @@ const parsed = JSON.parse(cleanText);
       { error: "Erreur serveur inattendue." },
       { status: 500 }
     );
-  }  
+  }
 }

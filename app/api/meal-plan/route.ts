@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import { anthropic } from "@/lib/anthropic";
+import { prisma } from "@/lib/prisma";
 
 const SYSTEM_PROMPT = `Tu es un diététicien expert en régime low-FODMAP.
 Tu génères des plans de repas stricts low-FODMAP, équilibrés et savoureux.
-
 Tu réponds UNIQUEMENT en JSON valide, sans texte avant ni après, sans balises markdown.
 Structure exacte attendue :
 {
@@ -20,7 +20,6 @@ Structure exacte attendue :
     }
   ]
 }
-
 Règles :
 - Tous les aliments doivent être low-FODMAP selon Monash University
 - Repas variés, pas de répétition sur la semaine
@@ -31,7 +30,6 @@ export async function POST(req: NextRequest) {
   try {
     const { days = 3, preferences = "", restrictions = [] } = await req.json();
 
-    // Collecter le texte complet via le stream
     const stream = await anthropic.messages.stream({
       model: "claude-sonnet-4-6",
       max_tokens: 4096,
@@ -57,6 +55,15 @@ export async function POST(req: NextRequest) {
       .trim();
 
     const parsed = JSON.parse(clean);
+
+    // Sauvegarder en base
+    await prisma.mealPlan.create({
+      data: {
+        days,
+        prefs: preferences || null,
+        plan: parsed,
+      },
+    });
 
     return new Response(JSON.stringify(parsed), {
       headers: { "Content-Type": "application/json" },

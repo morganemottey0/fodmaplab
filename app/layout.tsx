@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import Navigation from "@/components/Navigation";
+import NavigationWrapper from "@/components/NavigationWrapper";
+import SessionProvider from "@/components/SessionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -30,24 +31,19 @@ export default function RootLayout({
     <html lang="fr">
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-touch-fullscreen" content="yes" />
         <meta name="format-detection" content="telephone=no" />
       </head>
-      <body>
-        <div style={{
-          maxWidth: "430px",
-          margin: "0 auto",
-          minHeight: "100dvh",
-          background: "#F8FBFF",
-          display: "flex",
-          flexDirection: "column",
-          position: "relative",
-        }}>
-          <main style={{ flex: 1, paddingBottom: "80px"}}>
+      <body style={{
+        maxWidth: "430px",
+        margin: "0 auto",
+        minHeight: "100dvh",
+        background: "#F8FBFF",
+      }}>
+        <SessionProvider>
+          <NavigationWrapper>
             {children}
-          </main>
-          <Navigation />
-        </div>
+          </NavigationWrapper>
+        </SessionProvider>
       </body>
     </html>
   );
