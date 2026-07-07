@@ -64,19 +64,31 @@ export default async function HomePage() {
             <Link
               key={f.href}
               href={f.href}
-              className={`rounded-2xl p-5 no-underline block ${f.primary ? "bg-primary" : "bg-primary-light"}`}
+              className="rounded-2xl p-5 block"
+              style={{
+                background: f.primary ? "var(--primary)" : "var(--primary-light)",
+                textDecoration: "none",
+              }}
             >
               <span className="text-3xl block mb-3">{f.icon}</span>
-              <p className={`text-sm font-semibold mb-0.5 ${f.primary ? "text-white" : "text-primary"}`}>
+              <p style={{
+                fontSize: "15px",
+                fontWeight: 600,
+                color: f.primary ? "#fff" : "var(--text-primary)",
+                margin: "0 0 4px",
+              }}>
                 {f.label}
               </p>
-              <p className={`text-xs ${f.primary ? "text-white opacity-70" : "text-muted"}`}>
+              <p style={{
+                fontSize: "12px",
+                color: f.primary ? "rgba(255,255,255,0.7)" : "var(--text-muted)",
+                margin: 0,
+              }}>
                 {f.sub}
               </p>
             </Link>
           ))}
         </div>
-
         {/* Niveaux FODMAP */}
         <p className="section-label">Niveaux FODMAP</p>
         <div className="grid grid-cols-3 gap-2 mb-7">
