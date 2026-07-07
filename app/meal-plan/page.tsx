@@ -10,6 +10,9 @@ const MEAL_LABELS = [
   { key: "dinner", label: "Dîner" },
 ] as const;
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 export default function MealPlanPage() {
   const [days, setDays] = useState(3);
   const [preferences, setPreferences] = useState("");

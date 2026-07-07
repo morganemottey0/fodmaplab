@@ -10,6 +10,9 @@ const SUGGESTIONS = [
   "Idée petit-déjeuner rapide",
 ];
 
+export const maxDuration = 60;
+export const dynamic = "force-dynamic";
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
