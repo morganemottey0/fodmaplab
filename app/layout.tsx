@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import NavigationWrapper from "@/components/NavigationWrapper";
 import SessionProvider from "@/components/SessionProvider";
-import SideBar from "@/components/SideBar";
 import "./globals.css";
+import AppShell from "./AppShell";
 
 export const metadata: Metadata = {
   title: "FODMAP AI",
@@ -36,16 +35,7 @@ export default function RootLayout({
       </head>
       <body>
         <SessionProvider>
-          <div className="app-shell">
-            {/* Sidebar desktop uniquement */}
-            <SideBar />
-            {/* Contenu principal */}
-            <div className="app-content">
-              <NavigationWrapper>
-                {children}
-              </NavigationWrapper>
-            </div>
-          </div>
+          <AppShell>{children}</AppShell>
         </SessionProvider>
       </body>
     </html>
