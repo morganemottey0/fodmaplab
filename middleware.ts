@@ -1,22 +1,28 @@
-import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth;
-  const isLoginPage = req.nextUrl.pathname === "/login";
-  const isApiAuth = req.nextUrl.pathname.startsWith("/api/auth");
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-  if (isApiAuth) return NextResponse.next();
-  if (!isLoggedIn && !isLoginPage) {
-    return NextResponse.redirect(new URL("/login", req.url));
+  const protectedRoutes = ["/", "/scanner", "/meal-plan", "/chat", "/journal"];
+
+  if (!protectedRoutes.includes(pathname)) {
+    return NextResponse.next();
   }
-  if (isLoggedIn && isLoginPage) {
-    return NextResponse.redirect(new URL("/", req.url));
+
+  const sessionToken =
+    req.cookies.get("next-auth.session-token")?.value ||
+    req.cookies.get("__Secure-next-auth.session-token")?.value ||
+    req.cookies.get("authjs.session-token")?.value ||
+    req.cookies.get("__Secure-authjs.session-token")?.value;
+
+  if (!sessionToken) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   return NextResponse.next();
-});
+}
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.json|icon).*)"],
+  matcher: ["/", "/scanner", "/meal-plan", "/chat", "/journal"],
 };
