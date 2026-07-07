@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/SideBar";
 import NavigationWrapper from "@/components/NavigationWrapper";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
