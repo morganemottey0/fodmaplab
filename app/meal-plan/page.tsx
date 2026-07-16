@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { DayPlan, MealPlan } from "@/types/fodmap";
+import { useClientGuard } from "@/hooks/useClientGuard";
 
 const DAYS_OPTIONS = [1, 2, 3, 5, 7];
 const MEAL_LABELS = [
@@ -11,6 +12,7 @@ const MEAL_LABELS = [
 ] as const;
 
 export default function MealPlanPage() {
+  const redirecting = useClientGuard();
   const [days, setDays] = useState(3);
   const [preferences, setPreferences] = useState("");
   const [mealPlan, setMealPlan] = useState<MealPlan | null>(null);
@@ -33,6 +35,8 @@ export default function MealPlanPage() {
     } catch { setError("Impossible de générer le plan."); }
     finally { setLoading(false); }
   };
+
+  if (redirecting) return null;
 
   return (
     <div className="bg-app min-h-screen">

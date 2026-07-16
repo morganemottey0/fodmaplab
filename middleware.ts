@@ -4,9 +4,10 @@ import type { NextRequest } from "next/server";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  const protectedRoutes = ["/", "/scanner", "/meal-plan", "/chat", "/journal"];
+  const protectedRoutes = ["/", "/scanner", "/meal-plan", "/chat", "/journal", "/favorites", "/patients"];
+  const isProtected = protectedRoutes.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
-  if (!protectedRoutes.includes(pathname)) {
+  if (!isProtected) {
     return NextResponse.next();
   }
 
@@ -24,5 +25,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/scanner", "/meal-plan", "/chat", "/journal"],
+  matcher: ["/", "/scanner", "/meal-plan", "/chat", "/journal", "/favorites", "/patients/:path*"],
 };

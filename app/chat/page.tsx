@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChatMessage } from "@/types/fodmap";
+import { useClientGuard } from "@/hooks/useClientGuard";
 
 const SUGGESTIONS = [
   "Puis-je manger de l'avocat ?",
@@ -14,6 +15,7 @@ export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 export default function ChatPage() {
+  const redirecting = useClientGuard();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -68,6 +70,8 @@ export default function ChatPage() {
       setLoading(false);
     }
   };
+
+  if (redirecting) return null;
 
   return (
     <div className="flex flex-col" style={{ height: "100dvh" }}>

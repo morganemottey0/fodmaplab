@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { colors } from "@/styles/tokens";
 
-const LINKS = [
+const CLIENT_LINKS = [
   {
     href: "/",
     label: "Accueil",
@@ -64,8 +65,36 @@ const LINKS = [
   },
 ];
 
+const DIETITIAN_LINKS = [
+  {
+    href: "/patients",
+    label: "Patients",
+    icon: (active: boolean) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="9" cy="7" r="4" stroke={active ? colors.primary : colors.textMuted} strokeWidth="1.8"/>
+        <path d="M2 21C2 17.134 5.134 14 9 14H15C18.866 14 22 17.134 22 21" stroke={active ? colors.primary : colors.textMuted} strokeWidth="1.8" strokeLinecap="round"/>
+        <path d="M19 8V14M16 11H22" stroke={active ? colors.primary : colors.textMuted} strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    href: "/scanner",
+    label: "Analyser",
+    icon: (active: boolean) => (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke={active ? colors.primary : colors.textMuted} strokeWidth="1.8"/>
+        <path d="M16.5 16.5L21 21" stroke={active ? colors.primary : colors.textMuted} strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+];
+
 export default function Navigation() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+  const isDietAdmin = role === "DIETITIAN" || role === "ADMIN";
+  const links = isDietAdmin ? DIETITIAN_LINKS : CLIENT_LINKS;
 
   return (
     <nav className="bottom-nav" style={{
@@ -84,8 +113,8 @@ export default function Navigation() {
       paddingTop: "10px",
       zIndex: 100,
     }}>
-      {LINKS.map((link) => {
-        const active = pathname === link.href;
+      {links.map((link) => {
+        const active = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
         return (
           <Link key={link.href} href={link.href} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", padding: "4px 16px", textDecoration: "none" }}>
             {link.icon(active)}

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 
-const LINKS = [
+const CLIENT_LINKS = [
   {
     href: "/",
     label: "Accueil",
@@ -63,14 +64,42 @@ const LINKS = [
   },
 ];
 
+const DIETITIAN_LINKS = [
+  {
+    href: "/patients",
+    label: "Mes patients",
+    icon: (active: boolean) => (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="9" cy="7" r="4" stroke={active ? "var(--primary)" : "var(--text-muted)"} strokeWidth="1.8"/>
+        <path d="M2 21C2 17.134 5.134 14 9 14H15C18.866 14 22 17.134 22 21" stroke={active ? "var(--primary)" : "var(--text-muted)"} strokeWidth="1.8" strokeLinecap="round"/>
+        <path d="M19 8V14M16 11H22" stroke={active ? "var(--primary)" : "var(--text-muted)"} strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+  {
+    href: "/scanner",
+    label: "Analyser",
+    icon: (active: boolean) => (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+        <circle cx="11" cy="11" r="7" stroke={active ? "var(--primary)" : "var(--text-muted)"} strokeWidth="1.8"/>
+        <path d="M16.5 16.5L21 21" stroke={active ? "var(--primary)" : "var(--text-muted)"} strokeWidth="1.8" strokeLinecap="round"/>
+      </svg>
+    ),
+  },
+];
+
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = (session?.user as { role?: string } | undefined)?.role;
 
-  if (pathname === "/login") return null;
+  if (pathname === "/login" || pathname === "/register") return null;
+
+  const isDietAdmin = role === "DIETITIAN" || role === "ADMIN";
+  const links = isDietAdmin ? DIETITIAN_LINKS : CLIENT_LINKS;
 
   return (
     <aside className="sidebar">
-      {/* Logo */}
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -80,10 +109,25 @@ export default function Sidebar() {
         <span className="sidebar-logo-text">FODMAP AI</span>
       </div>
 
-      {/* Nav links */}
+      {isDietAdmin && (
+        <div style={{
+          margin: "0 12px 8px",
+          padding: "6px 10px",
+          borderRadius: "10px",
+          background: "var(--primary-light)",
+          fontSize: "11px",
+          fontWeight: 600,
+          color: "var(--primary)",
+          textTransform: "uppercase",
+          letterSpacing: "0.05em",
+        }}>
+          {role === "ADMIN" ? "Administrateur" : "Diététicien"}
+        </div>
+      )}
+
       <nav className="sidebar-nav">
-        {LINKS.map((link) => {
-          const active = pathname === link.href;
+        {links.map((link) => {
+          const active = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
           return (
             <Link
               key={link.href}
@@ -97,7 +141,6 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Footer */}
       <div className="sidebar-footer">
         <p className="text-xs text-muted">FODMAP AI © 2026</p>
       </div>

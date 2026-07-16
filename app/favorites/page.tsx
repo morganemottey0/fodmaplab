@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { FodmapLevel } from "@/types/fodmap";
+import { useClientGuard } from "@/hooks/useClientGuard";
 
 interface FavoriteEntry {
   id: string;
@@ -25,6 +26,7 @@ const LEVEL_CONFIG = {
 };
 
 export default function FavoritesPage() {
+  const redirecting = useClientGuard();
   const [favorites, setFavorites] = useState<FavoriteEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<string | null>(null);
@@ -54,6 +56,8 @@ export default function FavoritesPage() {
       setRemoving(null);
     }
   };
+
+  if (redirecting) return null;
 
   return (
     <div className="bg-app min-h-screen">

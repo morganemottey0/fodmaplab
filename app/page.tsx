@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { auth, signOut } from "@/auth";
+import { redirect } from "next/navigation";
 
 const FEATURES = [
   { href: "/scanner", icon: "🔍", label: "Analyser", sub: "un aliment", primary: true },
@@ -16,6 +17,11 @@ const LEVELS = [
 
 export default async function HomePage() {
   const session = await auth();
+  const role = (session?.user as { role?: string } | undefined)?.role;
+
+  if (role === "DIETITIAN" || role === "ADMIN") {
+    redirect("/patients");
+  }
 
   return (
     <div className="bg-app min-h-screen">

@@ -15,20 +15,31 @@ enum Role {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  email         String     @unique
+  id            String          @id @default(cuid())
+  email         String          @unique
   name          String?
   password      String?
-  role          Role       @default(USER)
+  role          Role            @default(USER)
   emailVerified DateTime?
   image         String?
-  createdAt     DateTime   @default(now())
+  createdAt     DateTime        @default(now())
   analyses      Analysis[]
   mealPlans     MealPlan[]
   journal       Journal[]
   accounts      Account[]
   sessions      Session[]
   favorites     Favorite[]
+  weights       PatientWeight[]
+}
+
+model PatientWeight {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weight    Float
+  date      DateTime @default(now())
+  note      String?
+  createdAt DateTime @default(now())
 }
 
 model Analysis {
