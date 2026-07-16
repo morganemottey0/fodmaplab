@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 
+export async function GET() {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Non authentifié." }, { status: 401 });
+  }
+
+  try {
+    const favorites = await prisma.favorite.findMany({
+      where: { userId: session.user.id },
+      include: { analysis: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(favorites);
+  } catch (error) {
+    console.error("[favorites] GET error:", error);
+    return NextResponse.json({ error: "Erreur serveur." }, { status: 500 });
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   const session = await auth();
 
