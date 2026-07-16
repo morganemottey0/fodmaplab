@@ -17,6 +17,23 @@ export default function ScannerPage() {
   const [result, setResult] = useState<FodmapAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [favLoading, setFavLoading] = useState(false);
+
+  const toggleFavorite = async () => {
+    if (!result?.id || favLoading) return;
+    setFavLoading(true);
+    try {
+      const method = isFavorite ? "DELETE" : "POST";
+      const res = await fetch("/api/favorites", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ analysisId: result.id }),
+      });
+      if (res.ok) setIsFavorite(!isFavorite);
+    } catch { /* ignore */ }
+    finally { setFavLoading(false); }
+  };
 
   const analyze = async () => {
     if (!food.trim()) return;
@@ -24,6 +41,7 @@ export default function ScannerPage() {
     setLoading(true);
     setError(null);
     setResult(null);
+    setIsFavorite(false);
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
@@ -109,7 +127,22 @@ export default function ScannerPage() {
                   <p className="text-xs uppercase tracking-wide mb-1" style={{ color: cfg.text }}>Niveau FODMAP</p>
                   <p className="text-2xl font-semibold m-0" style={{ color: cfg.text }}>{cfg.label}</p>
                 </div>
-                <div className="w-12 h-12 rounded-full" style={{ background: cfg.dot }} />
+                <div className="flex items-center gap-3">
+                  {result.id && (
+                    <button
+                      onClick={toggleFavorite}
+                      disabled={favLoading}
+                      aria-label={isFavorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors disabled:opacity-50"
+                      style={{ background: "rgba(255,255,255,0.6)" }}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill={isFavorite ? cfg.dot : "none"} stroke={cfg.dot} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    </button>
+                  )}
+                  <div className="w-12 h-12 rounded-full" style={{ background: cfg.dot }} />
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">

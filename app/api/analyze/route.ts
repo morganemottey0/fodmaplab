@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
     const localResult = findFoodLocally(food);
     if (localResult) {
       // Sauvegarder en base
-      await prisma.analysis.create({
+      const saved = await prisma.analysis.create({
         data: {
           food,
           portion,
@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         ...localResult,
+        id: saved.id,
         food,
         portion,
         source: "local",
@@ -96,7 +97,7 @@ export async function POST(req: NextRequest) {
     const validated = FodmapResponseSchema.parse(parsed);
 
     // Sauvegarder en base
-    await prisma.analysis.create({
+    const saved = await prisma.analysis.create({
       data: {
         food: validated.food,
         portion: validated.portion,
@@ -110,8 +111,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       ...validated,
+      id: saved.id,
       source: "claude",
-    } satisfies FodmapAnalysis & { source: string });
+    } satisfies FodmapAnalysis & { id: string; source: string });
 
   } catch (error) {
     if (error instanceof z.ZodError) {

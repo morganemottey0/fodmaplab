@@ -8,6 +8,7 @@ export type FodmapType =
   | "polyols";
 
 export interface FodmapAnalysis {
+  id?: string;
   food: string;
   portion: number;
   level: FodmapLevel;

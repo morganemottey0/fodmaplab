@@ -19,6 +19,7 @@ model User {
   journal       Journal[]
   accounts      Account[]
   sessions      Session[]
+  favorites     Favorite[]
 }
 
 model Analysis {
@@ -31,7 +32,8 @@ model Analysis {
   tips        String
   source      String   @default("claude")
   userId      String?
-  user        User?    @relation(fields: [userId], references: [id])
+  user        User?      @relation(fields: [userId], references: [id])
+  favorites   Favorite[]
   createdAt   DateTime @default(now())
 }
 
@@ -89,4 +91,15 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Favorite {
+  id         String   @id @default(cuid())
+  userId     String
+  analysisId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  analysis   Analysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, analysisId])
 }
