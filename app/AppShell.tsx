@@ -6,7 +6,7 @@ import NavigationWrapper from "@/components/NavigationWrapper";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLogin = pathname === "/login";
+  const isLogin = pathname === "/login" || pathname === "/register";
 
   if (isLogin) {
     return <>{children}</>;

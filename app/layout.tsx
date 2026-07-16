@@ -4,13 +4,13 @@ import "./globals.css";
 import AppShell from "./AppShell";
 
 export const metadata: Metadata = {
-  title: "FODMAP AI",
+  title: "FODMAP",
   description: "Votre guide intelligent low-FODMAP",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "FODMAP AI",
+    title: "FODMAP",
   },
 };
 

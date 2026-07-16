@@ -2,13 +2,36 @@
 
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [showCredentials, setShowCredentials] = useState(false);
 
-  const handleLogin = async () => {
+  const handleGoogle = async () => {
     setLoading(true);
     await signIn("google", { callbackUrl: "/" });
+  };
+
+  const handleCredentials = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    const result = await signIn("credentials", {
+      email: form.email,
+      password: form.password,
+      redirect: false,
+    });
+    setLoading(false);
+    if (result?.ok) {
+      router.push("/");
+    } else {
+      setError("Email ou mot de passe incorrect");
+    }
   };
 
   return (
@@ -64,7 +87,7 @@ export default function LoginPage() {
 
           <div className="login-form-actions">
             <button
-              onClick={handleLogin}
+              onClick={handleGoogle}
               disabled={loading}
               className="btn-secondary"
             >
@@ -77,18 +100,71 @@ export default function LoginPage() {
               {loading ? "Connexion..." : "Continuer avec Google"}
             </button>
 
-            <button
-              onClick={handleLogin}
-              disabled={loading}
-              className="btn-primary"
-            >
-              Créer un compte
-            </button>
+            {!showCredentials ? (
+              <button
+                onClick={() => setShowCredentials(true)}
+                className="btn-primary"
+              >
+                Se connecter avec un compte test
+              </button>
+            ) : (
+              <form onSubmit={handleCredentials} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <input
+                  type="email"
+                  placeholder="Email"
+                  required
+                  value={form.email}
+                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  style={{
+                    padding: "12px 14px",
+                    borderRadius: "12px",
+                    border: "1.5px solid var(--border)",
+                    background: "var(--surface)",
+                    color: "var(--text-primary)",
+                    fontSize: "14px",
+                    outline: "none",
+                    width: "100%",
+                    boxSizing: "border-box",
+                  }}
+                />
+                <input
+                  type="password"
+                  placeholder="Mot de passe"
+                  required
+                  value={form.password}
+                  onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  style={{
+                    padding: "12px 14px",
+                    borderRadius: "12px",
+                    border: "1.5px solid var(--border)",
+                    background: "var(--surface)",
+                    color: "var(--text-primary)",
+                    fontSize: "14px",
+                    outline: "none",
+                    width: "100%",
+                    boxSizing: "border-box",
+                  }}
+                />
+                {error && <p style={{ color: "#ef4444", fontSize: "13px", margin: 0 }}>{error}</p>}
+                <button type="submit" disabled={loading} className="btn-primary">
+                  {loading ? "Connexion..." : "Se connecter"}
+                </button>
+              </form>
+            )}
           </div>
 
-          <p className="login-form-legal">
-            En continuant, vous acceptez nos conditions d'utilisation et notre politique de confidentialité.
-          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", alignItems: "center", marginTop: "16px" }}>
+            <Link
+              href="/register"
+              className="btn-secondary"
+              style={{ textDecoration: "none", textAlign: "center", display: "block", width: "100%" }}
+            >
+              Créer un compte
+            </Link>
+            <p className="login-form-legal" style={{ margin: 0 }}>
+              En créant un compte vous acceptez nos conditions d'utilisation.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -104,7 +180,7 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1 className="text-white text-4xl font-bold tracking-tight text-center mb-2">
-            FODMAP AI
+            FODMAP
           </h1>
           <p className="text-center text-sm mb-8" style={{ color: "rgba(255,255,255,0.65)", lineHeight: 1.6 }}>
             Votre guide intelligent<br />pour le régime low-FODMAP
@@ -118,7 +194,7 @@ export default function LoginPage() {
           <p className="text-sm mb-7" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
             Connectez-vous pour suivre votre alimentation.
           </p>
-          <button onClick={handleLogin} disabled={loading} className="btn-secondary mb-3">
+          <button onClick={handleGoogle} disabled={loading} className="btn-secondary mb-3">
             <svg width="20" height="20" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -127,12 +203,45 @@ export default function LoginPage() {
             </svg>
             {loading ? "Connexion..." : "Continuer avec Google"}
           </button>
-          <button onClick={handleLogin} disabled={loading} className="btn-primary">
-            Créer un compte
-          </button>
-          <p className="text-xs text-center mt-5" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
-            En continuant, vous acceptez nos conditions d'utilisation.
-          </p>
+
+          {!showCredentials ? (
+            <button onClick={() => setShowCredentials(true)} className="btn-primary">
+              Se connecter avec un compte test
+            </button>
+          ) : (
+            <form onSubmit={handleCredentials} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <input
+                type="email"
+                placeholder="Email"
+                required
+                value={form.email}
+                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                style={{ padding: "12px 14px", borderRadius: "12px", border: "1.5px solid var(--border)", background: "var(--surface)", color: "var(--text-primary)", fontSize: "14px", outline: "none", width: "100%", boxSizing: "border-box" }}
+              />
+              <input
+                type="password"
+                placeholder="Mot de passe"
+                required
+                value={form.password}
+                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                style={{ padding: "12px 14px", borderRadius: "12px", border: "1.5px solid var(--border)", background: "var(--surface)", color: "var(--text-primary)", fontSize: "14px", outline: "none", width: "100%", boxSizing: "border-box" }}
+              />
+              {error && <p style={{ color: "#ef4444", fontSize: "13px", margin: 0 }}>{error}</p>}
+              <button type="submit" disabled={loading} className="btn-primary">
+                {loading ? "Connexion..." : "Se connecter"}
+              </button>
+            </form>
+          )}
+
+          <div style={{ marginTop: "16px", display: "flex", flexDirection: "column", gap: "10px", alignItems: "center" }}>
+            <Link
+              href="/register"
+              className="btn-secondary"
+              style={{ textDecoration: "none", textAlign: "center", display: "block", width: "100%" }}
+            >
+              Créer un compte
+            </Link>
+          </div>
         </div>
       </div>
 
